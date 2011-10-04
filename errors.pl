@@ -1,19 +1,22 @@
 use strict;
 use HTML::Entities;
 
-sub findErrors {
+sub findErrorLines {
     my $logfile = shift;
-    my @errors = ( $logfile =~ /(ERROR.*?)\n\d\d [A-Z][a-z][a-z] \d\d\d\d/gs );
+    my @errors = ( $logfile =~ /(\d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d,\d\d\d ERROR.*?)\n\d\d [A-Z][a-z][a-z] \d\d\d\d/gs );
     return @errors;
 }
 
 my $log = join('', <STDIN>);
 
-my @errors = findErrors($log);
+my @errorLines = findErrorLines($log);
 #print 'Found errors: ' + @errors+0 + "\n\n";
 
 my %errorCounts;
-foreach my $error (@errors) {
+foreach my $errorLine (@errorLines) {    
+    my $error = $errorLine;
+    $error =~ s/\d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d,\d\d\d //;
+
     my $count = %errorCounts->{$error};
     if (!$count) {
 	$count =0;
@@ -40,3 +43,7 @@ foreach my $error (sort {$errorCounts{$b} <=> $errorCounts{$a} } keys %errorCoun
 }
 
 print '</table>';
+print '</body></html>';
+
+1;
+
