@@ -12,10 +12,20 @@ my $log = join('', <STDIN>);
 my @errorLines = findErrorLines($log);
 #print 'Found errors: ' + @errors+0 + "\n\n";
 
+my $firstDate;
+my $lastDate;
+
 my %errorCounts;
 foreach my $errorLine (@errorLines) {    
     my $error = $errorLine;
     $error =~ s/\d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d,\d\d\d //;
+
+    my $dateString = $errorLine;
+    $dateString =~ s/^(.*?) ERROR.*/$1/gs;
+    if (!$firstDate) {
+	$firstDate = $dateString;
+    }
+    $lastDate = $dateString;
 
     my $count = %errorCounts->{$error};
     if (!$count) {
@@ -29,7 +39,10 @@ print '
 <html>
 <head><link rel="stylesheet" href="styles.css"></head>
 <body>
-<table>
+';
+
+print "<p>Live errors from $firstDate to $lastDate</p>";
+print '<table>
 ';
 
 foreach my $error (sort {$errorCounts{$b} <=> $errorCounts{$a} } keys %errorCounts) {
